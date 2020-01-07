@@ -9,16 +9,7 @@ import YAML from 'js-yaml';
 import URL from 'url';
 import sanitizyReadme from '@verdaccio/readme';
 
-import {
-  APP_ERROR,
-  DEFAULT_PORT,
-  DEFAULT_DOMAIN,
-  DEFAULT_PROTOCOL,
-  CHARACTER_ENCODING,
-  HEADERS,
-  DIST_TAGS,
-  DEFAULT_USER,
-} from './constants';
+import { APP_ERROR, DEFAULT_PORT, DEFAULT_DOMAIN, DEFAULT_PROTOCOL, CHARACTER_ENCODING, HEADERS, DIST_TAGS, DEFAULT_USER } from './constants';
 import { generateGravatarUrl, GENERIC_AVATAR } from '../utils/user';
 
 import { Package, Version, Author } from '@verdaccio/types';
@@ -143,10 +134,13 @@ export function validateMetadata(object: Package, name: string): Package {
 export function combineBaseUrl(protocol: string, host: string | void, prefix?: string | void): string {
   let result = `${protocol}://${host}`;
 
-  if (prefix) {
-    prefix = prefix.replace(/\/$/, '');
+  if (prefix && prefix.length !== 0) {
+    prefix = prefix.trim();
+    if (prefix.endsWith('/')) {
+      prefix = prefix.slice(0, -1);
+    }
 
-    result = prefix.indexOf('/') === 0 ? `${result}${prefix}` : prefix;
+    result = prefix.length === 0 || prefix.indexOf('/') === 0 ? `${result}${prefix}` : prefix;
   }
 
   return result;
@@ -182,12 +176,7 @@ export function convertDistRemoteToLocalTarballUrls(pkg: Package, req: Request, 
  * @param {*} uri
  * @return {String} a parsed url
  */
-export function getLocalRegistryTarballUri(
-  uri: string,
-  pkgName: string,
-  req: Request,
-  urlPrefix: string | void
-): string {
+export function getLocalRegistryTarballUri(uri: string, pkgName: string, req: Request, urlPrefix: string | void): string {
   const currentHost = req.headers.host;
 
   if (!currentHost) {
